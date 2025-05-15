@@ -1391,7 +1391,7 @@
         console.log("ADMIN PANEL: Using CLOUD backend API base:", BASE);
 
         // Safety check for placeholder URL in production-like environment
-        if (cloudRunBaseUrl.includes("https://docnest-780614596615.asia-south1.run.app") || cloudRunBaseUrl.includes("https://docnest-780614596615.asia-south1.run.app")) { // Check for common placeholder parts
+        if (cloudRunBaseUrl.includes("your-docnest-backend-servicename") || cloudRunBaseUrl.includes("your-actual-cloud-run-url")) { // Check for common placeholder parts
             const warningMessage = "CRITICAL: Cloud Run URL (BASE) is a placeholder! API calls will fail. Please update 'cloudRunBaseUrl' in the admin.html script.";
             console.error(warningMessage);
             // Display a very prominent, long-lasting notification
