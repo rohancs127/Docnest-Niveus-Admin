@@ -345,7 +345,7 @@
             backendApiUrl = cloudRunApiUrl;
             console.log("Using CLOUD backend API:", backendApiUrl);
             // Safety check for placeholder URL in production-like environment
-            if (cloudRunApiUrl.includes("https://docnest-780614596615.asia-south1.run.app") || cloudRunApiUrl.includes("https://docnest-780614596615.asia-south1.run.app")) {
+            if (cloudRunApiUrl.includes("https://docnest-780614596615.asia-south1.run.app/api/auth") || cloudRunApiUrl.includes("https://docnest-780614596615.asia-south1.run.app/api/auth")) {
                  const warningMessage = "CRITICAL: Cloud Run URL is a placeholder! Please update 'cloudRunApiUrl' in the script.";
                  console.error(warningMessage);
                  showLoginError("Configuration error. Cannot contact login service. Please inform the administrator.");
