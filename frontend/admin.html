@@ -1381,7 +1381,7 @@
       const localBaseUrl = "http://localhost:8000"; // NO TRAILING SLASH
 
       // IMPORTANT: Replace this with your *actual* Cloud Run service URL (NO TRAILING SLASH)
-      const cloudRunBaseUrl = "https://your-docnest-backend-servicename-xxxxxx-yy.a.run.app"; // NO TRAILING SLASH
+      const cloudRunBaseUrl = "https://docnest-780614596615.asia-south1.run.app"; // NO TRAILING SLASH
 
       if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
         BASE = localBaseUrl;
@@ -1391,7 +1391,7 @@
         console.log("ADMIN PANEL: Using CLOUD backend API base:", BASE);
 
         // Safety check for placeholder URL in production-like environment
-        if (cloudRunBaseUrl.includes("your-docnest-backend-servicename") || cloudRunBaseUrl.includes("your-actual-cloud-run-url")) { // Check for common placeholder parts
+        if (cloudRunBaseUrl.includes("https://docnest-780614596615.asia-south1.run.app") || cloudRunBaseUrl.includes("https://docnest-780614596615.asia-south1.run.app")) { // Check for common placeholder parts
             const warningMessage = "CRITICAL: Cloud Run URL (BASE) is a placeholder! API calls will fail. Please update 'cloudRunBaseUrl' in the admin.html script.";
             console.error(warningMessage);
             // Display a very prominent, long-lasting notification

@@ -336,7 +336,7 @@
           let backendApiUrl;
           const localApiUrl = "http://localhost:8000/api/auth";
           // IMPORTANT: Replace this with your *actual* Cloud Run service URL
-          const cloudRunApiUrl = "https://your-docnest-backend-servicename-xxxxxx-yy.a.run.app/api/auth";
+          const cloudRunApiUrl = "https://docnest-780614596615.asia-south1.run.app/api/auth";
 
           if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
             backendApiUrl = localApiUrl;
@@ -345,7 +345,7 @@
             backendApiUrl = cloudRunApiUrl;
             console.log("Using CLOUD backend API:", backendApiUrl);
             // Safety check for placeholder URL in production-like environment
-            if (cloudRunApiUrl.includes("your-docnest-backend-servicename-xxxxxx-yy") || cloudRunApiUrl.includes("your-actual-cloud-run-url")) {
+            if (cloudRunApiUrl.includes("https://docnest-780614596615.asia-south1.run.app") || cloudRunApiUrl.includes("https://docnest-780614596615.asia-south1.run.app")) {
                  const warningMessage = "CRITICAL: Cloud Run URL is a placeholder! Please update 'cloudRunApiUrl' in the script.";
                  console.error(warningMessage);
                  showLoginError("Configuration error. Cannot contact login service. Please inform the administrator.");
