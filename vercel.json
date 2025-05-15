@@ -1,6 +1,6 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/", "destination": "/admin.html" }
+    { "source": "/", "destination": "frontend/admin.html" }
   ]
 }
