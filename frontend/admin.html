@@ -1385,77 +1385,99 @@
       }
     }
 
-    async function secureFetch(url, options = {}) {
-      let token = await getAuthToken();
-      
-      // If no token, try to refresh it once
-      if (!token) {
-        console.log("Admin Panel: No token available, attempting to refresh...");
-        if (firebaseAuth && firebaseAuth.currentUser) {
-          try {
+   async function secureFetch(url, options = {}) {
+    let token = await getAuthToken(); // getAuthToken should try to return a valid token or null
+
+    // If getAuthToken() returned null but we have an active Firebase user, try one more refresh.
+    // This can happen if the token expired and getAuthToken's internal refresh failed, or if currentUser was briefly unavailable.
+    if (!token && firebaseAuth && firebaseAuth.currentUser) {
+        console.log("Admin Panel: Initial token missing in secureFetch, attempting one refresh...");
+        try {
             token = await firebaseAuth.currentUser.getIdToken(true); // Force refresh
-            sessionStorage.setItem("token", token);
-          } catch (refreshError) {
-            console.error("Admin Panel: Token refresh failed:", refreshError);
-            if(window.showNotification) window.showNotification("Authentication error. Please log in again.", "error");
-            if (firebaseAuth) await firebaseAuth.signOut().catch(e => console.error("Sign out after token refresh failed", e));
-            throw new Error("Authentication failed. Please log in again.");
-          }
-        } else {
-          console.error("Admin Panel: No user logged in for secureFetch to " + url);
-          throw new Error("Authentication required. Please log in.");
+            sessionStorage.setItem("token", token); // Ensure it's stored
+        } catch (e) {
+            console.error("Admin Panel: Token refresh attempt in secureFetch failed.", e);
+            // Sign out if token refresh fails critically
+            if (firebaseAuth) await firebaseAuth.signOut().catch(err => console.error("Sign out after refresh fail in secureFetch failed", err));
+            throw new Error("Authentication token refresh failed. Please log in again.");
         }
-      }
-
-      const headers = { ...options.headers };
-      headers["Authorization"] = `Bearer ${token}`;
-      
-      if (options.body && !(options.body instanceof FormData) && (options.method === 'POST' || options.method === 'PUT' || options.method === 'PATCH')) {
-        headers["Content-Type"] = "application/json";
-      }
-
-      try {
-        const response = await fetch(url, { ...options, headers });
-        
-        // If we get a 401, try to refresh the token once and retry
-        if (response.status === 401) {
-          console.log("Admin Panel: Received 401, attempting token refresh...");
-          if (firebaseAuth && firebaseAuth.currentUser) {
-            try {
-              token = await firebaseAuth.currentUser.getIdToken(true); // Force refresh
-              sessionStorage.setItem("token", token);
-              headers["Authorization"] = `Bearer ${token}`;
-              
-              // Retry the request with new token
-              const retryResponse = await fetch(url, { ...options, headers });
-              if (retryResponse.status === 401) {
-                throw new Error("Authentication failed after token refresh");
-              }
-              return retryResponse;
-            } catch (refreshError) {
-              console.error("Admin Panel: Token refresh failed on 401:", refreshError);
-              if(window.showNotification) window.showNotification("Session expired. Please log in again.", "error");
-              if (firebaseAuth) await firebaseAuth.signOut().catch(e => console.error("Sign out after 401 token refresh failed", e));
-              throw new Error("Authentication failed. Please log in again.");
-            }
-          }
-        }
-        
-        if (response.status === 401 || response.status === 403) {
-          console.error(`Admin Panel: Authorization error (${response.status}) for ${url}.`);
-          if(window.showNotification) window.showNotification("Authorization error. You might need to log in again.", "error");
-          if (firebaseAuth) await firebaseAuth.signOut().catch(e => console.error("Sign out after API auth error failed", e));
-          throw new Error(`Authorization failed (${response.status})`);
-        }
-        return response;
-      } catch (networkError) {
-        console.error("Admin Panel: Network error during secureFetch:", networkError);
-        if (!networkError.message.includes("Authentication failed") && !networkError.message.includes("Authorization failed")) {
-          if(window.showNotification) window.showNotification(`Network Error: ${networkError.message}. Check connection or console.`, "error");
-        }
-        throw networkError;
-      }
     }
+
+    if (!token) { // If still no token after potential refresh
+        console.error("Admin Panel: Auth token unavailable for secureFetch to " + url);
+        // User should already be signed out by getAuthToken or onAuthStateChanged if currentUser is null
+        // If for some reason they are not, this is a final measure.
+        if (firebaseAuth && firebaseAuth.currentUser) { // Check if there's still a user before signing out
+             await firebaseAuth.signOut().catch(e => console.error("Sign out due to no token in secureFetch failed", e));
+        }
+        throw new Error("Authentication token not available. Please log in again.");
+    }
+
+    const headers = { ...options.headers };
+    headers["Authorization"] = `Bearer ${token}`;
+    if (options.body && !(options.body instanceof FormData) && (options.method === 'POST' || options.method === 'PUT' || options.method === 'PATCH')) {
+        headers["Content-Type"] = "application/json";
+    }
+
+    try {
+        let response = await fetch(url, { ...options, headers });
+
+        if (response.status === 401) { 
+            console.log(`Admin Panel: Received 401 for ${url}, attempting token refresh and retry...`);
+            if (firebaseAuth && firebaseAuth.currentUser) {
+                try {
+                    const newToken = await firebaseAuth.currentUser.getIdToken(true); // Force refresh
+                    sessionStorage.setItem("token", newToken);
+                    headers["Authorization"] = `Bearer ${newToken}`; // Update header with the new token
+                    
+                    console.log(`Admin Panel: Retrying ${url} with new token.`);
+                    response = await fetch(url, { ...options, headers }); // Retry the request
+                } catch (refreshError) {
+                    console.error("Admin Panel: Token refresh for 401 retry failed:", refreshError);
+                    if (firebaseAuth) await firebaseAuth.signOut().catch(e => console.error("Sign out after 401 retry refresh fail", e));
+                    throw new Error("Session expired after failed refresh. Please log in again."); // Propagate error
+                }
+            } else {
+                 // No current user to refresh token for, treat as hard 401
+                 console.warn("Admin Panel: No Firebase user for 401 token refresh.");
+            }
+        }
+
+        // Check status again after potential retry
+        if (response.status === 401 || response.status === 403) { 
+            console.error(`Admin Panel: Final Authorization error (${response.status}) for ${url}.`);
+            if(window.showNotification) window.showNotification("Authorization error. Your session may have expired or you lack permissions. Please log in again.", "error", 7000);
+            if (firebaseAuth) await firebaseAuth.signOut().catch(e => console.error("Sign out after final auth error failed", e));
+            throw new Error(`Authorization failed (${response.status})`);
+        }
+        
+        // For non-auth server errors (like 500), response.ok will be false
+        if (!response.ok) {
+            // Try to get more details from the error response body
+            let errorDetail = `Request failed with status ${response.status}`;
+            try {
+                const errorData = await response.json();
+                errorDetail = errorData.detail || errorData.message || JSON.stringify(errorData);
+            } catch (e) {
+                // If response is not JSON, use text
+                try { errorDetail = await response.text(); } catch (e2) { /* keep original errorDetail */ }
+            }
+             console.error(`Admin Panel: HTTP error ${response.status} for ${url}. Details: ${errorDetail}`);
+            throw new Error(errorDetail); // Throw so it can be caught by the calling function
+        }
+
+        return response;
+    } catch (networkOrThrownError) { // Catches initial fetch errors, and errors explicitly thrown above
+        console.error(`Admin Panel: Error in secureFetch for ${url}:`, networkOrThrownError);
+        // Avoid double-notifying for auth errors that already showed a specific message
+        if (!networkOrThrownError.message.toLowerCase().includes("authorization") && 
+            !networkOrThrownError.message.toLowerCase().includes("authentication") &&
+            !networkOrThrownError.message.toLowerCase().includes("session expired")) {
+             if(window.showNotification) window.showNotification(`Network or Server Error: ${networkOrThrownError.message}.`, "error", 7000);
+        }
+        throw networkOrThrownError; // Re-throw to be caught by the specific data fetching function
+    }
+}
 
     // ================================================================
     // DYNAMIC BACKEND URL CONFIGURATION
