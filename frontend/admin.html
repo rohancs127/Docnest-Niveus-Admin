@@ -1,4 +1,3 @@
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -1637,16 +1636,22 @@
           childrenContainer.classList.remove("collapsed"); 
           isCollapsed = false;
         }
-        toggleIcon.classList.toggle("collapsed", isCollapsed);
-        toggleIcon.innerHTML = isCollapsed
-          ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" /></svg>`
-          : `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>`;
+        
+        // Update the icon's rotation based on the collapsed state
+        const svgElement = toggleIcon.querySelector('svg');
+        if (svgElement) {
+          if (isCollapsed) {
+            svgElement.classList.remove('rotate-0');
+            svgElement.classList.add('rotate-[-90deg]');
+          } else {
+            svgElement.classList.remove('rotate-[-90deg]');
+            svgElement.classList.add('rotate-0');
+          }
+        }
       }
     }
 
     function renderTree(nodes) {
-      // (Your existing renderTree logic seems okay, ensure escapeJSString is used for all dynamic content)
-      // Minor simplification:
       if (!Array.isArray(nodes)) {
         return '<p class="text-[var(--text-red-accent)] p-2">Invalid tree data.</p>';
       }
@@ -1678,8 +1683,8 @@
                 </div>
               </div>
             </div>`;
-          }).join("") : "";
-        const initialToggleIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>`;
+        }).join("") : "";
+        const initialToggleIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>`;
         return `
           <div class="tree-node" data-node-id="${n.id}" data-node-name="${nodeNameSafe}" data-node-type="NODE">
             <div class="node-content group hover:bg-[var(--bg-card-hover)] rounded-md px-1 py-0.5">
@@ -1893,11 +1898,54 @@
         document.querySelectorAll(".form-inline").forEach((f) => { if (f !== form) f.style.display = "none";});
         form.style.display = isVisible ? "none" : "block";
         if (!isVisible) {
+          // Create form if it doesn't exist
+          if (!form.querySelector('form')) {
+            form.innerHTML = `
+              <form onsubmit="submitInlineForm(${parentId}, this.querySelector('button[type=submit]'))" class="space-y-4">
+                <div>
+                  <label class="label-text">Name</label>
+                  <input type="text" id="name-${parentId}" class="input-field" required placeholder="Enter name">
+                </div>
+                <div>
+                  <label class="label-text">Type</label>
+                  <select id="type-${parentId}" class="input-field" onchange="toggleFileInput(${parentId})">
+                    <option value="FOLDER">Folder</option>
+                    <option value="FILE">File</option>
+                  </select>
+                </div>
+                <div id="file-method-options-${parentId}" style="display: none;">
+                  <label class="label-text">File Source</label>
+                  <select id="file-source-${parentId}" class="input-field" onchange="toggleLinkOrUpload(${parentId})">
+                    <option value="link">Link</option>
+                    <option value="upload">Upload</option>
+                  </select>
+                </div>
+                <div id="link-input-container-${parentId}" style="display: none;">
+                  <label class="label-text">Link URL</label>
+                  <input type="url" id="link-${parentId}" class="input-field" placeholder="https://...">
+                </div>
+                <div id="upload-input-container-${parentId}" style="display: none;">
+                  <label class="label-text">Upload File</label>
+                  <input type="file" id="file-upload-${parentId}" class="input-field">
+                </div>
+                <div>
+                  <label class="label-text">Description</label>
+                  <textarea id="description-${parentId}" class="input-field" placeholder="Enter description"></textarea>
+                </div>
+                <div class="flex justify-end gap-2">
+                  <button type="button" class="submit-button secondary" onclick="showInlineForm(${parentId})">Cancel</button>
+                  <button type="submit" class="submit-button">
+                    <span class="button-text">Add Item</span>
+                  </button>
+                </div>
+              </form>`;
+          }
           form.querySelector('input[type="text"], select')?.focus();
-          toggleFileInput(parentId); 
+          toggleFileInput(parentId);
         }
       }
     }
+
     function toggleFileInput(parentId) {
       const typeSelect = document.getElementById(`type-${parentId}`);
       const fileMethodOptionsDiv = document.getElementById(`file-method-options-${parentId}`);
