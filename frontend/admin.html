@@ -1,7 +1,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Admin UI - DocNest Admin (Themed)</title>
+  <title>DocNest Admin</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
@@ -759,14 +759,15 @@
     <header
       class="mb-6 flex flex-col sm:flex-row justify-between items-center gap-4"
     >
-      <div class="flex items-center">
+      <div class="flex">
         <img
+          id="docnest-logo"
           src="https://niveussolutions.com/wp-content/uploads/2025/02/Niveus-ntt-data.png"
           alt="DocNest Logo"
-          class="h-10 w-auto mr-3"
+          class="h-12 w-auto mr-3 pt-2"
         />
         <h1
-          class="text-4xl sm:text-5xl font-bold tracking-tight text-[var(--text-card-header)]"
+          class="text-4xl sm:text-4xl font-bold tracking-tight text-[var(--text-card-header)]"
         >
           DocNest Admin
         </h1>
@@ -1327,6 +1328,8 @@
     // Potentially disable UI elements that depend on Firebase if it's not initialized
   }
 
+  
+
   // --- Auth State Management ---
   const userMenuButton = document.getElementById("user-menu-button");
   const userDisplayNameSpan = document.getElementById("user-display-name");
@@ -1574,17 +1577,26 @@
   const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`;
   const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>`;
 
+
+  const LIGHT_MODE_LOGO = "https://niveussolutions.com/wp-content/uploads/2025/02/Niveus-ntt-data.png";
+const DARK_MODE_LOGO = "https://gitlab.niveussolutions.com/uploads/-/system/appearance/header_logo/1/Nivues_log.png";
+const docnestLogo = document.getElementById('docnest-logo');
+
   function applyTheme(theme) {
-    if (theme === "light") {
-      document.body.classList.add("light-theme");
-      if (themeToggleButton) themeToggleButton.innerHTML = moonIcon;
-      localStorage.setItem("adminTheme", "light"); // Use a distinct key for admin theme
-    } else {
-      document.body.classList.remove("light-theme");
-      if (themeToggleButton) themeToggleButton.innerHTML = sunIcon;
-      localStorage.setItem("adminTheme", "dark"); // Use a distinct key
-    }
+  if (!docnestLogo) return; // Ensure logo element exists
+
+  if (theme === "light") {
+    document.body.classList.add("light-theme");
+    if(themeToggleButton) themeToggleButton.innerHTML = moonIcon;
+    docnestLogo.src = LIGHT_MODE_LOGO; // Set light mode logo
+    localStorage.setItem("adminTheme", "light");
+  } else {
+    document.body.classList.remove("light-theme");
+    if(themeToggleButton) themeToggleButton.innerHTML = sunIcon;
+    docnestLogo.src = DARK_MODE_LOGO; // Set dark mode logo
+    localStorage.setItem("adminTheme", "dark");
   }
+}
   if (themeToggleButton) {
     // Check if button exists
     themeToggleButton.addEventListener("click", () =>
