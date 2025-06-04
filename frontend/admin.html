@@ -3231,73 +3231,74 @@ async function startEdit(id, type, currentName, currentDescription) {
     return;
   }
 
-  // Find the main content display area of the node/artifact
-  const contentDisplayElement = nodeElement.querySelector('.node-content > span:first-child'); // The span holding icons and text
-  if (!contentDisplayElement) {
+  // This is the span.tree-node-text or span.tree-artifact-text
+  let displayElementToReplace = nodeElement.querySelector('.node-content > span:first-child'); 
+  if (!displayElementToReplace) {
     console.error("Cannot find content display element for editing:", id);
     return;
   }
   
   const actionsElement = nodeElement.querySelector('.node-content .actions');
-  if(actionsElement) actionsElement.style.display = 'none'; // Hide actions while editing
+  if (actionsElement) actionsElement.style.display = 'none'; // Hide actions while editing
 
-  // Create a temporary edit form container
+  // --- Create the edit form container ---
   const editFormContainer = document.createElement('div');
   editFormContainer.className = 'inline-edit-form p-2 space-y-2 border border-[var(--border-input)] rounded-md bg-[var(--bg-inline-form)] w-full';
   
-  // Name/Title Input
+  const nameLabel = document.createElement('label');
+  nameLabel.className = 'label-text !mb-0.5';
+  nameLabel.textContent = (type === 'node' ? 'Folder Name:' : 'File Title:');
   const nameInput = document.createElement('input');
   nameInput.type = 'text';
   nameInput.value = currentName;
-  nameInput.className = 'input-field text-sm py-1 px-2 w-full';
-  nameInput.placeholder = (type === 'node' ? 'Folder name' : 'File title');
+  nameInput.className = 'input-field text-sm py-1 px-2 w-full mb-1';
 
-  // Description Textarea
+  const descriptionLabel = document.createElement('label');
+  descriptionLabel.className = 'label-text !mb-0.5';
+  descriptionLabel.textContent = 'Description:';
   const descriptionTextarea = document.createElement('textarea');
   descriptionTextarea.value = currentDescription || "";
-  descriptionTextarea.className = 'input-field text-sm py-1 px-2 w-full min-h-[60px]';
-  descriptionTextarea.placeholder = 'Description (optional)';
+  descriptionTextarea.className = 'input-field text-sm py-1 px-2 w-full min-h-[60px] mb-1';
+  descriptionTextarea.placeholder = 'Optional';
   
-  // Buttons container
   const buttonsDiv = document.createElement('div');
   buttonsDiv.className = 'flex justify-end space-x-2 mt-2';
 
-  // Save Button
   const saveButton = document.createElement('button');
   saveButton.innerHTML = `<span class="button-text">Save</span>`;
-  saveButton.className = 'submit-button text-xs py-1';
+  saveButton.className = 'submit-button text-xs py-1 px-2'; // Adjusted padding
   saveButton.title = 'Save changes';
 
-  // Cancel Button
   const cancelButton = document.createElement('button');
   cancelButton.innerHTML = `<span class="button-text">Cancel</span>`;
-  cancelButton.className = 'submit-button secondary text-xs py-1';
-  cancelButton.type = 'button'; // Important to prevent form submission if inside a larger form
+  cancelButton.className = 'submit-button secondary text-xs py-1 px-2'; // Adjusted padding
+  cancelButton.type = 'button'; 
   cancelButton.title = 'Cancel editing';
 
   buttonsDiv.appendChild(cancelButton);
   buttonsDiv.appendChild(saveButton);
 
-  editFormContainer.appendChild(document.createTextNode('Edit Name/Title:'));
+  editFormContainer.appendChild(nameLabel);
   editFormContainer.appendChild(nameInput);
-  editFormContainer.appendChild(document.createTextNode('Edit Description:'));
+  editFormContainer.appendChild(descriptionLabel);
   editFormContainer.appendChild(descriptionTextarea);
   editFormContainer.appendChild(buttonsDiv);
+  // --- End of form creation ---
 
-  // Store original display and replace with form
-  const originalDisplayContent = contentDisplayElement.innerHTML; // Save inner HTML
-  contentDisplayElement.innerHTML = ''; // Clear it
-  contentDisplayElement.appendChild(editFormContainer); // Add the form
+  const originalDisplayElementClone = displayElementToReplace.cloneNode(true); // Clone the original display element
+  displayElementToReplace.replaceWith(editFormContainer); // Replace original with the form
 
   nameInput.focus();
   nameInput.select();
 
   const revertUI = () => {
-    contentDisplayElement.innerHTML = originalDisplayContent; // Restore original content
-    if(actionsElement) actionsElement.style.display = ''; // Show actions again
+    editFormContainer.replaceWith(originalDisplayElementClone); // Put the original clone back
+    // displayElementToReplace now refers to the element that was removed (editFormContainer).
+    // If you need to reference the element that's back in the DOM, it's originalDisplayElementClone.
+    if (actionsElement) actionsElement.style.display = ''; // Show actions again
   };
 
-  const handleSave = async () => { // Corrected: removed underscore
+  const handleSave = async () => {
     const newName = nameInput.value.trim();
     const newDescription = descriptionTextarea.value.trim();
 
@@ -3308,7 +3309,7 @@ async function startEdit(id, type, currentName, currentDescription) {
     }
 
     if (newName === currentName && newDescription === (currentDescription || "")) {
-      revertUI();
+      revertUI(); // No changes, just revert
       return;
     }
     
@@ -3335,39 +3336,33 @@ async function startEdit(id, type, currentName, currentDescription) {
         throw new Error(errorData.detail || errorData.message);
       }
       
-      // 1. Update data attributes on the main tree node element
-      // These are used by other functions (like search, and new clicks on edit/info)
+      // --- SUCCESS PATH ---
+      // 1. Update data attributes on the main persistent nodeElement
       nodeElement.dataset.nodeName = newName; 
       nodeElement.dataset.description = newDescription;
 
-      // 2. Revert the UI structure (removes the edit form and restores the display elements)
+      // 2. Update the content of the CLONED display element BEFORE putting it back
+      const nameTextInClone = (type === 'node') ?
+                              originalDisplayElementClone.querySelector('.node-display-name') :
+                              originalDisplayElementClone.querySelector('.truncate'); // Ensure this selector is correct for artifacts
+      if (nameTextInClone) {
+        nameTextInClone.textContent = newName;
+      }
+      // The description isn't directly displayed in the tree row's text, so no direct update needed here for it,
+      // but the data attribute on nodeElement is updated.
+
+      // 3. Revert UI - this will put the MODIFIED clone (originalDisplayElementClone) back into the DOM
       revertUI(); 
 
-      // 3. NOW, update the text content of the restored display elements
-      //    `contentDisplayElement` is the span whose innerHTML was just restored by revertUI().
-      const nameTextElement = (type === 'node') ?
-                              contentDisplayElement.querySelector('.node-display-name') :
-                              contentDisplayElement.querySelector('.tree-artifact-text > .truncate'); // Be specific if .truncate is used elsewhere
-      if (nameTextElement) {
-        nameTextElement.textContent = newName;
-      }
-      // Note: The description is not directly visible in the tree row itself, 
-      // but it's stored in nodeElement.dataset.description and will be used by the info dropdown or next edit.
-
-      // 4. Update the onclick attributes of the 'Edit' and 'Info' buttons for THIS item
-      //    This ensures that if the user clicks edit/info again without a page refresh,
-      //    the functions are called with the NEW name and description.
-      //    `actionsElement` is the div containing the buttons, restored by revertUI if it was hidden.
+      // 4. Update onclick attributes on the action buttons (which are persistent siblings)
       if (actionsElement) {
-        const editButton = actionsElement.querySelector('button[title^="Edit"]'); // title starts with "Edit"
-        const infoButton = actionsElement.querySelector('button[title^="Show"]'); // title starts with "Show"
+        const editButton = actionsElement.querySelector('button[title^="Edit"]'); 
+        const infoButton = actionsElement.querySelector('button[title^="Show"]');
 
         if (editButton) {
-          // startEdit(id, type, name, description)
           editButton.setAttribute('onclick', `event.stopPropagation(); startEdit(${id}, '${type}', '${escapeJSString(newName)}', '${escapeJSString(newDescription)}')`);
         }
         if (infoButton) {
-          // showInfoDropdown(event, id, type, name, description)
           infoButton.setAttribute('onclick', `event.stopPropagation(); showInfoDropdown(event, ${id}, '${type}', '${escapeJSString(newName)}', '${escapeJSString(newDescription)}')`);
         }
       }
@@ -3377,25 +3372,21 @@ async function startEdit(id, type, currentName, currentDescription) {
         "success"
       );
       await fetchActivity(); // Refresh activity log
-      // No need for full fetchTree() if local updates are done correctly.
 
     } catch (error) {
       console.error('Error updating item:', error);
       window.showNotification(`Error updating: ${error.message}`, "error");
-      // On error, the form remains, allowing the user to try again or cancel.
-      // If you want to revert UI on error, you could call revertUI() here too.
+      // Form remains on error, allowing user to retry or cancel.
     } finally {
       window.setButtonLoading(saveButton, false, originalButtonText);
       cancelButton.disabled = false;
     }
-  };
+  }; // End of handleSave
 
+  // --- Add event listeners ---
   saveButton.addEventListener('click', handleSave);
-  cancelButton.addEventListener('click', () => {
-    revertUI();
-  });
+  cancelButton.addEventListener('click', revertUI); // No need for an anonymous function if it just calls revertUI
 
-  // Handle Enter key for save and Escape key for cancel on inputs
   nameInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -3405,12 +3396,12 @@ async function startEdit(id, type, currentName, currentDescription) {
     }
   });
   descriptionTextarea.addEventListener('keydown', (e) => {
+    // Enter in textarea should create a newline, not save. Only Escape cancels.
     if (e.key === 'Escape') {
       revertUI();
     }
-    // Note: Enter key in textarea should typically create a new line, not save.
   });
-}
+} // End of startEdit function
 </script>
 </body>
 </html>
