@@ -3297,7 +3297,7 @@ async function startEdit(id, type, currentName, currentDescription) {
     if(actionsElement) actionsElement.style.display = ''; // Show actions again
   };
 
-  const handleSave = async () => {
+  const handleSave = async () => { // Corrected: removed underscore
     const newName = nameInput.value.trim();
     const newDescription = descriptionTextarea.value.trim();
 
@@ -3307,9 +3307,8 @@ async function startEdit(id, type, currentName, currentDescription) {
       return;
     }
 
-    // No change check
     if (newName === currentName && newDescription === (currentDescription || "")) {
-      revertUI(); // Just revert, no API call needed
+      revertUI();
       return;
     }
     
@@ -3336,40 +3335,55 @@ async function startEdit(id, type, currentName, currentDescription) {
         throw new Error(errorData.detail || errorData.message);
       }
       
-      // --- Update UI in the tree directly ---
-      // Find the correct span to update the name/title
-      const nameDisplaySpan = (type === 'node') ? 
-                                nodeElement.querySelector('.node-display-name') : 
-                                nodeElement.querySelector('.tree-artifact-text > .truncate');
-      if (nameDisplaySpan) {
-        nameDisplaySpan.textContent = newName;
-      }
-      // Update data attributes on the main node/artifact element for future edits/info
-      nodeElement.dataset.nodeName = newName; // Used by search and potentially other features
+      // 1. Update data attributes on the main tree node element
+      // These are used by other functions (like search, and new clicks on edit/info)
+      nodeElement.dataset.nodeName = newName; 
       nodeElement.dataset.description = newDescription;
 
-      // Update the onclick for edit and info buttons with new name & description
-      // This is a bit complex as we need to re-generate the onclick string.
-      // For simplicity, a full fetchTree() might be easier but less performant.
-      // Or, update the specific action buttons' onclicks if they can be precisely targeted.
-      // The data attributes are updated, so subsequent clicks on *newly rendered buttons after a refresh* would get new data.
-      // For now, let's assume data attributes are the primary source for the startEdit/showInfo calls.
+      // 2. Revert the UI structure (removes the edit form and restores the display elements)
+      revertUI(); 
 
-      revertUI(); // Revert to original structure, but it will contain the new name due to previous lines
+      // 3. NOW, update the text content of the restored display elements
+      //    `contentDisplayElement` is the span whose innerHTML was just restored by revertUI().
+      const nameTextElement = (type === 'node') ?
+                              contentDisplayElement.querySelector('.node-display-name') :
+                              contentDisplayElement.querySelector('.tree-artifact-text > .truncate'); // Be specific if .truncate is used elsewhere
+      if (nameTextElement) {
+        nameTextElement.textContent = newName;
+      }
+      // Note: The description is not directly visible in the tree row itself, 
+      // but it's stored in nodeElement.dataset.description and will be used by the info dropdown or next edit.
+
+      // 4. Update the onclick attributes of the 'Edit' and 'Info' buttons for THIS item
+      //    This ensures that if the user clicks edit/info again without a page refresh,
+      //    the functions are called with the NEW name and description.
+      //    `actionsElement` is the div containing the buttons, restored by revertUI if it was hidden.
+      if (actionsElement) {
+        const editButton = actionsElement.querySelector('button[title^="Edit"]'); // title starts with "Edit"
+        const infoButton = actionsElement.querySelector('button[title^="Show"]'); // title starts with "Show"
+
+        if (editButton) {
+          // startEdit(id, type, name, description)
+          editButton.setAttribute('onclick', `event.stopPropagation(); startEdit(${id}, '${type}', '${escapeJSString(newName)}', '${escapeJSString(newDescription)}')`);
+        }
+        if (infoButton) {
+          // showInfoDropdown(event, id, type, name, description)
+          infoButton.setAttribute('onclick', `event.stopPropagation(); showInfoDropdown(event, ${id}, '${type}', '${escapeJSString(newName)}', '${escapeJSString(newDescription)}')`);
+        }
+      }
 
       window.showNotification(
         `${type === 'node' ? 'Folder' : 'File'} details updated! ✅`,
         "success"
       );
       await fetchActivity(); // Refresh activity log
-      // Potentially refresh a part of the tree or the specific node if necessary for other UI consistency
-      // For now, local update of name/description attributes + main text content.
-      // A full fetchTree() would ensure everything is consistent if local updates are tricky. Consider this trade-off.
+      // No need for full fetchTree() if local updates are done correctly.
 
     } catch (error) {
       console.error('Error updating item:', error);
       window.showNotification(`Error updating: ${error.message}`, "error");
-      // Don't revert UI on error, allow user to retry or cancel.
+      // On error, the form remains, allowing the user to try again or cancel.
+      // If you want to revert UI on error, you could call revertUI() here too.
     } finally {
       window.setButtonLoading(saveButton, false, originalButtonText);
       cancelButton.disabled = false;
