@@ -1853,20 +1853,18 @@ function renderTree(nodes) {
     const hasArtifacts = n.artifacts && n.artifacts.length > 0;
     const isExpandable = hasChildren || hasArtifacts;
 
-    // Initial state: collapsed. So the arrow should point right/left (-90deg).
-    // The `transform` is defined in CSS, so we just need the correct class.
-    // The CSS applies `rotate(-90deg)` when `.tree-toggle-icon.collapsed` is present.
-    // We want it to be collapsed initially, so add 'collapsed' class to the span.
     const initialToggleIconHtml = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg>`;
 
     const childrenHTML = hasChildren ? renderTree(n.children) : "";
     const nodeNameSafe = escapeJSString(n.name);
+    const nodeDescriptionSafe = escapeJSString(n.description || ""); // For nodes
+
     const artifactsHTML = hasArtifacts ? n.artifacts.map((a) => {
       if (!a || typeof a.id === "undefined" || typeof a.title === "undefined") {
         console.warn("Skipping invalid artifact in renderTree:", a); return "";
       }
       const titleContent = escapeJSString(a.title);
-      const descriptionContent = escapeJSString(a.description || "");
+      const descriptionContent = escapeJSString(a.description || ""); // For artifacts
       const linkContent = escapeJSString(a.link || "#");
       return `
         <div class="tree-artifact-wrapper" data-artifact-id="${a.id}" data-node-id="${a.id}" data-node-name="${titleContent}" data-description="${descriptionContent}" data-node-type="ARTIFACT" data-parent-node-id="${n.id}">
@@ -1875,8 +1873,15 @@ function renderTree(nodes) {
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 tree-artifact-icon flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
               <span class="truncate pr-1">${titleContent}</span>
             </span>
-            <div class="actions opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
-              <button title="Rename file" class="action-icon-btn" onclick="event.stopPropagation(); startRename(${a.id}, 'artifact', '${titleContent}')">
+            <div class="actions opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 space-x-1">
+              {/* */}
+              <button title="Show file info" class="action-icon-btn" onclick="event.stopPropagation(); showInfoDropdown(event, ${a.id}, 'artifact', '${titleContent}', '${descriptionContent}')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+              {/* */}
+              <button title="Edit file details" class="action-icon-btn" onclick="event.stopPropagation(); startEdit(${a.id}, 'artifact', '${titleContent}', '${descriptionContent}')">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
@@ -1891,12 +1896,10 @@ function renderTree(nodes) {
         </div>`;
     }).join("") : "";
 
-    // Apply the 'collapsed' class to the tree-toggle-icon span initially
-    // This makes the CSS rule '.tree-toggle-icon.collapsed svg' apply from the start.
     const toggleIconClasses = isExpandable ? 'tree-toggle-icon collapsed' : 'tree-toggle-icon w-5 h-5 mr-1';
 
     return `
-      <div class="tree-node" data-node-id="${n.id}" data-node-name="${nodeNameSafe}" data-node-type="NODE">
+      <div class="tree-node" data-node-id="${n.id}" data-node-name="${nodeNameSafe}" data-description="${nodeDescriptionSafe}" data-node-type="NODE">
         <div class="node-content group hover:bg-[var(--bg-card-hover)] rounded-md px-1 py-0.5">
           <span class="font-medium tree-node-text cursor-pointer flex items-center flex-grow min-w-0" onclick="toggleTreeNode(${n.id})">
             ${isExpandable ? `<span id="toggle-icon-${n.id}" class="${toggleIconClasses}">${initialToggleIconHtml}</span>` : '<span class="tree-toggle-icon w-5 h-5 mr-1"></span>'}
@@ -1905,13 +1908,19 @@ function renderTree(nodes) {
           </span>
           <div class="actions opacity-0 group-hover:opacity-100 transition-opacity space-x-1 flex-shrink-0">
             <button title="Add item to this folder" class="action-icon-btn add" onclick="event.stopPropagation(); showInlineForm(${n.id}, this)">
-            <button title="Add item to this folder" class="action-icon-btn add" onclick="event.stopPropagation(); showInlineForm(${n.id}, this)">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" />
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 8V16M8 12H16" />
               </svg>
             </button>
-            <button title="Rename folder" class="action-icon-btn" onclick="event.stopPropagation(); startRename(${n.id}, 'node', '${nodeNameSafe}')">
+            {/* */}
+            <button title="Show folder info" class="action-icon-btn" onclick="event.stopPropagation(); showInfoDropdown(event, ${n.id}, 'node', '${nodeNameSafe}', '${nodeDescriptionSafe}')">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+            {/* */}
+            <button title="Edit folder details" class="action-icon-btn" onclick="event.stopPropagation(); startEdit(${n.id}, 'node', '${nodeNameSafe}', '${nodeDescriptionSafe}')">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
@@ -1928,6 +1937,70 @@ function renderTree(nodes) {
         <div class="tree-children-container collapsed" id="children-${n.id}">${childrenHTML}${artifactsHTML}</div>
       </div>`;
   }).join("");
+}
+
+let currentInfoDropdown = null;
+
+function showInfoDropdown(event, id, type, name, description) {
+  event.stopPropagation(); // Prevent event bubbling
+
+  // Remove any existing dropdown
+  if (currentInfoDropdown) {
+    currentInfoDropdown.remove();
+    currentInfoDropdown = null;
+  }
+
+  const buttonElement = event.currentTarget; // The button that was clicked
+  const rect = buttonElement.getBoundingClientRect();
+
+  const dropdown = document.createElement('div');
+  dropdown.className = 'absolute p-3 rounded-md shadow-lg z-50 border text-sm';
+  dropdown.style.backgroundColor = 'var(--bg-card)';
+  dropdown.style.borderColor = 'var(--border-primary)';
+  dropdown.style.color = 'var(--text-primary)';
+  // Position below the button, slightly offset
+  dropdown.style.top = `${rect.bottom + window.scrollY + 2}px`;
+  dropdown.style.left = `${rect.left + window.scrollX - 100}px`; // Adjust left offset as needed
+  dropdown.style.minWidth = '250px';
+  dropdown.style.maxWidth = '350px';
+
+  // Sanitize inputs before displaying
+  const safeName = escapeJSString(name);
+  const safeDescription = escapeJSString(description);
+
+  dropdown.innerHTML = `
+    <div class="flex justify-between items-center mb-2">
+      <h4 class="text-md font-semibold text-[var(--text-card-header)]">Item Information</h4>
+      <button 
+        class="modal-close-btn !text-xl !p-0" 
+        onclick="this.closest('.absolute').remove(); currentInfoDropdown = null;" 
+        title="Close info">
+        &times;
+      </button>
+    </div>
+    <div class="space-y-1.5">
+      <p><strong>ID:</strong> <span class="font-mono text-xs">${id}</span></p>
+      <p><strong>Type:</strong> ${type.charAt(0).toUpperCase() + type.slice(1)}</p>
+      <p><strong>Name:</strong> ${safeName}</p>
+      <p class="break-words"><strong>Description:</strong> ${safeDescription || '<em class="text-[var(--text-tertiary)]">Not provided</em>'}</p>
+    </div>
+  `;
+
+  document.body.appendChild(dropdown);
+  currentInfoDropdown = dropdown;
+
+  // Click outside to close
+  function clickOutsideHandler(e) {
+    if (currentInfoDropdown && !currentInfoDropdown.contains(e.target) && e.target !== buttonElement) {
+      currentInfoDropdown.remove();
+      currentInfoDropdown = null;
+      document.removeEventListener('click', clickOutsideHandler, true); // Use capture phase
+    }
+  }
+  // Add with slight delay to avoid capturing the initial click that opened it
+  setTimeout(() => {
+    document.addEventListener('click', clickOutsideHandler, true);
+  }, 0);
 }
 
   async function fetchNodeName(nodeId) {
@@ -3152,140 +3225,182 @@ function renderTree(nodes) {
   }
   // --- End Activity Log ---
 
-  // Add these new functions for rename functionality
-  async function startRename(id, type, currentName) {
-    const nodeElement = document.querySelector(`[data-node-id="${id}"]`);
-    if (!nodeElement) return;
+// Rename this function and modify its content
+// from: async function startRename(id, type, currentName) {
+// to:
+async function startEdit(id, type, currentName, currentDescription) {
+  const nodeElement = document.querySelector(`[data-node-id="${id}"]`);
+  if (!nodeElement) {
+    console.error("Cannot find node element for editing:", id);
+    return;
+  }
 
-    // Correctly target the span that displays the name, which might be nested differently
-    // for nodes vs. artifacts, and account for the "ID: " part if it's a node.
-    let nameContainer;
-    let nameSpanToReplace;
-    if (type === 'node') {
-      nameContainer = nodeElement.querySelector('.tree-node-text');
-      nameSpanToReplace = nodeElement.querySelector('.tree-node-text .node-display-name');
-    } else { // type === 'artifact'
-      nameContainer = nodeElement.querySelector('.tree-artifact-text');
-      nameSpanToReplace = nodeElement.querySelector('.tree-artifact-text span.truncate'); // This was mostly correct for artifact
-    }
+  // Find the main content display area of the node/artifact
+  const contentDisplayElement = nodeElement.querySelector('.node-content > span:first-child'); // The span holding icons and text
+  if (!contentDisplayElement) {
+    console.error("Cannot find content display element for editing:", id);
+    return;
+  }
+  
+  const actionsElement = nodeElement.querySelector('.node-content .actions');
+  if(actionsElement) actionsElement.style.display = 'none'; // Hide actions while editing
 
-    if (!nameContainer || !nameSpanToReplace) {
-      console.error("Could not find name element for renaming.", {
-        id,
-        type,
-        currentName,
-        nodeElement
-      });
+  // Create a temporary edit form container
+  const editFormContainer = document.createElement('div');
+  editFormContainer.className = 'inline-edit-form p-2 space-y-2 border border-[var(--border-input)] rounded-md bg-[var(--bg-inline-form)] w-full';
+  
+  // Name/Title Input
+  const nameInput = document.createElement('input');
+  nameInput.type = 'text';
+  nameInput.value = currentName;
+  nameInput.className = 'input-field text-sm py-1 px-2 w-full';
+  nameInput.placeholder = (type === 'node' ? 'Folder name' : 'File title');
+
+  // Description Textarea
+  const descriptionTextarea = document.createElement('textarea');
+  descriptionTextarea.value = currentDescription || "";
+  descriptionTextarea.className = 'input-field text-sm py-1 px-2 w-full min-h-[60px]';
+  descriptionTextarea.placeholder = 'Description (optional)';
+  
+  // Buttons container
+  const buttonsDiv = document.createElement('div');
+  buttonsDiv.className = 'flex justify-end space-x-2 mt-2';
+
+  // Save Button
+  const saveButton = document.createElement('button');
+  saveButton.innerHTML = `<span class="button-text">Save</span>`;
+  saveButton.className = 'submit-button text-xs py-1';
+  saveButton.title = 'Save changes';
+
+  // Cancel Button
+  const cancelButton = document.createElement('button');
+  cancelButton.innerHTML = `<span class="button-text">Cancel</span>`;
+  cancelButton.className = 'submit-button secondary text-xs py-1';
+  cancelButton.type = 'button'; // Important to prevent form submission if inside a larger form
+  cancelButton.title = 'Cancel editing';
+
+  buttonsDiv.appendChild(cancelButton);
+  buttonsDiv.appendChild(saveButton);
+
+  editFormContainer.appendChild(document.createTextNode('Edit Name/Title:'));
+  editFormContainer.appendChild(nameInput);
+  editFormContainer.appendChild(document.createTextNode('Edit Description:'));
+  editFormContainer.appendChild(descriptionTextarea);
+  editFormContainer.appendChild(buttonsDiv);
+
+  // Store original display and replace with form
+  const originalDisplayContent = contentDisplayElement.innerHTML; // Save inner HTML
+  contentDisplayElement.innerHTML = ''; // Clear it
+  contentDisplayElement.appendChild(editFormContainer); // Add the form
+
+  nameInput.focus();
+  nameInput.select();
+
+  const revertUI = () => {
+    contentDisplayElement.innerHTML = originalDisplayContent; // Restore original content
+    if(actionsElement) actionsElement.style.display = ''; // Show actions again
+  };
+
+  const handleSave = async () => {
+    const newName = nameInput.value.trim();
+    const newDescription = descriptionTextarea.value.trim();
+
+    if (!newName) {
+      window.showNotification('Name/Title cannot be empty.', 'error');
+      nameInput.focus();
       return;
     }
 
-    const originalName = nameSpanToReplace.textContent.trim();
+    // No change check
+    if (newName === currentName && newDescription === (currentDescription || "")) {
+      revertUI(); // Just revert, no API call needed
+      return;
+    }
+    
+    const originalButtonText = saveButton.querySelector(".button-text")?.textContent || "Save";
+    window.setButtonLoading(saveButton, true, originalButtonText);
+    cancelButton.disabled = true;
 
-    // Create the input field
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.value = originalName;
-    input.className = 'input-field text-sm py-0.5 px-1 w-full bg-[var(--bg-input)] border-[var(--border-input)] flex-grow'; // flex-grow to take available space
+    try {
+      const endpoint = type === 'node' ?
+        `${BASE_API_URL}/api/nodes/${id}` :
+        `${BASE_API_URL}/api/artifacts/${id}`;
 
-    // Create the confirm button
-    const confirmButton = document.createElement('button');
-    confirmButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>`;
-    confirmButton.className = 'action-icon-btn add ml-2 flex-shrink-0'; // Added flex-shrink-0
-    confirmButton.title = 'Confirm Rename';
+      const payload = type === 'node' ? 
+        { name: newName, description: newDescription } : 
+        { title: newName, description: newDescription };
 
-    // Create a wrapper for the input and button to replace the entire name container
-    const inputWrapper = document.createElement('div');
-    inputWrapper.className = 'flex items-center flex-grow min-w-0'; // Ensure it takes space
-    inputWrapper.appendChild(input);
-    inputWrapper.appendChild(confirmButton);
+      const response = await secureFetch(endpoint, {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+      });
 
-    // Store original content and replace
-    const originalContentContainer = nameContainer.cloneNode(true); // Clone for later restoration
-    nameContainer.replaceWith(inputWrapper);
-
-    input.focus();
-    input.select();
-
-    const executeRename = async () => {
-      const newName = input.value.trim();
-      if (!newName || newName === originalName) {
-        // Revert if empty or unchanged
-        inputWrapper.replaceWith(originalContentContainer);
-        return;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: `Failed to update: ${response.statusText}` }));
+        throw new Error(errorData.detail || errorData.message);
       }
-
-      confirmButton.disabled = true; // Disable button during processing
-      input.disabled = true;
-
-      try {
-        const endpoint =
-          type === 'node' ?
-          `${BASE_API_URL}/api/nodes/${id}` :
-          `${BASE_API_URL}/api/artifacts/${id}`;
-        const payload = type === 'node' ? {
-          name: newName
-        } : {
-          title: newName
-        };
-
-        const response = await secureFetch(endpoint, {
-          method: 'PUT',
-          body: JSON.stringify(payload)
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to rename: ${response.statusText}`);
-        }
-
-        // Update the text content of the original span inside the cloned container
-        if (type === 'node') {
-          originalContentContainer.querySelector('.node-display-name').textContent = newName;
-          originalContentContainer.querySelector('.tree-node-text .text-xs')?.remove(); // Remove old ID span if present for node
-          originalContentContainer.querySelector('.tree-node-text').appendChild(document.createTextNode(` (ID: ${id})`));
-        } else {
-          originalContentContainer.querySelector('span.truncate').textContent = newName;
-        }
-
-        // Replace the input field with the updated original content container
-        inputWrapper.replaceWith(originalContentContainer);
-
-        if (window.showNotification)
-          window.showNotification(
-            `${type === 'node' ? 'Folder' : 'File'} renamed successfully! ✅`,
-            "success"
-          );
-        await fetchActivity();
-      } catch (error) {
-        console.error('Error renaming:', error);
-        if (window.showNotification)
-          window.showNotification(`Error renaming: ${error.message}`, "error");
-        // Revert UI to original state on error
-        inputWrapper.replaceWith(originalContentContainer);
-      } finally {
-        confirmButton.disabled = false;
-        input.disabled = false;
+      
+      // --- Update UI in the tree directly ---
+      // Find the correct span to update the name/title
+      const nameDisplaySpan = (type === 'node') ? 
+                                nodeElement.querySelector('.node-display-name') : 
+                                nodeElement.querySelector('.tree-artifact-text > .truncate');
+      if (nameDisplaySpan) {
+        nameDisplaySpan.textContent = newName;
       }
-    };
+      // Update data attributes on the main node/artifact element for future edits/info
+      nodeElement.dataset.nodeName = newName; // Used by search and potentially other features
+      nodeElement.dataset.description = newDescription;
 
-    // Event listeners
-    input.addEventListener('blur', () => {
-      // Small delay to allow click on button to register before blur handler
-      setTimeout(() => {
-        if (!inputWrapper.contains(document.activeElement)) {
-          executeRename();
-        }
-      }, 100);
-    });
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault(); // Prevent new line in input
-        executeRename();
-      } else if (e.key === 'Escape') {
-        inputWrapper.replaceWith(originalContentContainer);
-      }
-    });
-    confirmButton.addEventListener('click', executeRename);
-  }
+      // Update the onclick for edit and info buttons with new name & description
+      // This is a bit complex as we need to re-generate the onclick string.
+      // For simplicity, a full fetchTree() might be easier but less performant.
+      // Or, update the specific action buttons' onclicks if they can be precisely targeted.
+      // The data attributes are updated, so subsequent clicks on *newly rendered buttons after a refresh* would get new data.
+      // For now, let's assume data attributes are the primary source for the startEdit/showInfo calls.
+
+      revertUI(); // Revert to original structure, but it will contain the new name due to previous lines
+
+      window.showNotification(
+        `${type === 'node' ? 'Folder' : 'File'} details updated! ✅`,
+        "success"
+      );
+      await fetchActivity(); // Refresh activity log
+      // Potentially refresh a part of the tree or the specific node if necessary for other UI consistency
+      // For now, local update of name/description attributes + main text content.
+      // A full fetchTree() would ensure everything is consistent if local updates are tricky. Consider this trade-off.
+
+    } catch (error) {
+      console.error('Error updating item:', error);
+      window.showNotification(`Error updating: ${error.message}`, "error");
+      // Don't revert UI on error, allow user to retry or cancel.
+    } finally {
+      window.setButtonLoading(saveButton, false, originalButtonText);
+      cancelButton.disabled = false;
+    }
+  };
+
+  saveButton.addEventListener('click', handleSave);
+  cancelButton.addEventListener('click', () => {
+    revertUI();
+  });
+
+  // Handle Enter key for save and Escape key for cancel on inputs
+  nameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSave();
+    } else if (e.key === 'Escape') {
+      revertUI();
+    }
+  });
+  descriptionTextarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      revertUI();
+    }
+    // Note: Enter key in textarea should typically create a new line, not save.
+  });
+}
 </script>
 </body>
 </html>
