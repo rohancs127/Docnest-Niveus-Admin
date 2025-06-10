@@ -1846,8 +1846,10 @@ function toggleTreeNode(nodeId, doToggle = true) {
 
 // REPLACE your entire existing renderTree function with this new one.
 
+// REPLACE your entire existing renderTree function with this new, complete version.
+
 function renderTree(nodes) {
-  const fragment = document.createDocumentFragment(); // Use a fragment for performance
+  const fragment = document.createDocumentFragment();
 
   if (!Array.isArray(nodes)) {
     const errorEl = document.createElement('p');
@@ -1860,7 +1862,7 @@ function renderTree(nodes) {
   nodes.forEach((n) => {
     if (!n || typeof n.id === "undefined" || typeof n.name === "undefined") {
       console.warn("Skipping invalid node in renderTree:", n);
-      return; // continue to next iteration
+      return;
     }
 
     const hasChildren = n.children && n.children.length > 0;
@@ -1879,7 +1881,6 @@ function renderTree(nodes) {
     const nodeContentDiv = document.createElement('div');
     nodeContentDiv.className = 'node-content group hover:bg-[var(--bg-card-hover)] rounded-md px-1 py-0.5';
 
-    // --- Clickable Text/Icon Area ---
     const textSpan = document.createElement('span');
     textSpan.className = 'font-medium tree-node-text cursor-pointer flex items-center flex-grow min-w-0';
     textSpan.onclick = () => toggleTreeNode(n.id);
@@ -1887,7 +1888,7 @@ function renderTree(nodes) {
     const toggleIconHTML = isExpandable
       ? `<span id="toggle-icon-${n.id}" class="tree-toggle-icon collapsed"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" /></svg></span>`
       : '<span class="tree-toggle-icon w-5 h-5 mr-1"></span>';
-    
+
     textSpan.innerHTML = `
         ${toggleIconHTML}
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 tree-node-icon flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
@@ -1895,40 +1896,28 @@ function renderTree(nodes) {
         <span class="text-xs text-[var(--text-tertiary)] ml-1.5 flex-shrink-0">(ID: ${n.id})</span>
     `;
 
-    // --- Actions Area ---
+    // --- Node Actions ---
     const actionsDiv = document.createElement('div');
     actionsDiv.className = 'actions opacity-0 group-hover:opacity-100 transition-opacity space-x-1 flex-shrink-0';
     
-    // Add Item Button
     const addButton = document.createElement('button');
     addButton.title = 'Add item to this folder';
     addButton.className = 'action-icon-btn add';
     addButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 8V16M8 12H16" /></svg>`;
     addButton.onclick = (e) => { e.stopPropagation(); showInlineForm(n.id, addButton); };
     
-    // Info Button
     const infoButton = document.createElement('button');
     infoButton.title = 'Show folder info';
     infoButton.className = 'action-icon-btn';
     infoButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
-    infoButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // Pass the raw data directly. No string escaping needed!
-        showInfoDropdown(e, n.id, 'node', n.name, n.description || "");
-    });
+    infoButton.addEventListener('click', (e) => { e.stopPropagation(); showInfoDropdown(e, n.id, 'node', n.name, n.description || ""); });
 
-    // Edit Button
     const editButton = document.createElement('button');
     editButton.title = 'Edit folder details';
     editButton.className = 'action-icon-btn';
     editButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>`;
-    editButton.addEventListener('click', (e) => {
-        e.stopPropagation();
-        // Pass the raw data directly. No string escaping needed!
-        startEdit(n.id, 'node', n.name, n.description || "");
-    });
+    editButton.addEventListener('click', (e) => { e.stopPropagation(); startEdit(n.id, 'node', n.name, n.description || ""); });
 
-    // Delete Button
     const deleteButton = document.createElement('button');
     deleteButton.title = 'Delete folder';
     deleteButton.className = 'action-icon-btn delete';
@@ -1950,34 +1939,57 @@ function renderTree(nodes) {
 
     // --- Recursive calls and Artifacts ---
     if (hasChildren) {
-      childrenContainer.appendChild(renderTree(n.children)); // Recurse for children
+      childrenContainer.appendChild(renderTree(n.children));
     }
+
     if (hasArtifacts) {
-      // (The artifact rendering can be refactored similarly, but this fix is for nodes)
-      // For now, let's keep artifact rendering as is, since editing them was working.
-      // If artifacts ALSO have this issue, their rendering block must also be changed to use addEventListener.
       n.artifacts.forEach(a => {
-        const titleContent = a.title; // Raw title
-        const descriptionContent = a.description || ""; // Raw description
+        // --- THIS PART IS NOW FULLY REFACTORED ---
         const artifactWrapper = document.createElement('div');
         artifactWrapper.className = 'tree-artifact-wrapper';
-        artifactWrapper.dataset.nodeId = a.id;
-        // ... set other artifact data attributes ...
+        Object.assign(artifactWrapper.dataset, {
+          nodeId: a.id,
+          nodeName: a.title,
+          description: a.description || "",
+          nodeType: "ARTIFACT",
+          parentNodeId: n.id,
+        });
+
+        const artifactContent = document.createElement('div');
+        artifactContent.className = 'node-content group hover:bg-[var(--bg-card-hover)] rounded-md px-1 py-0.5';
+
+        const artifactText = document.createElement('span');
+        artifactText.className = 'tree-artifact-text clickable flex items-center text-sm flex-grow';
+        artifactText.title = `View details for: ${escapeJSString(a.title)}`;
+        artifactText.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 tree-artifact-icon flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+          <span class="truncate pr-1">${escapeJSString(a.title)}</span>`;
+        artifactText.onclick = () => showArtifactDetailsModal(a.title, a.description, a.link);
+
+        const artifactActions = document.createElement('div');
+        artifactActions.className = 'actions opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 space-x-1';
+
+        const infoBtn = document.createElement('button');
+        infoBtn.title = 'Show file info';
+        infoBtn.className = 'action-icon-btn';
+        infoBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+        infoBtn.addEventListener('click', (e) => { e.stopPropagation(); showInfoDropdown(e, a.id, 'artifact', a.title, a.description || ""); });
+
+        const editBtn = document.createElement('button');
+        editBtn.title = 'Edit file details';
+        editBtn.className = 'action-icon-btn';
+        editBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>`;
+        editBtn.addEventListener('click', (e) => { e.stopPropagation(); startEdit(a.id, 'artifact', a.title, a.description || ""); });
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.title = 'Delete file';
+        deleteBtn.className = 'action-icon-btn delete';
+        deleteBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>`;
+        deleteBtn.onclick = (e) => { e.stopPropagation(); openDeleteConfirmationModal(a.id, 'artifact', a.title); };
         
-        // This part is still using innerHTML and onclick strings, which is less ideal
-        // but was reportedly working. Refactoring it would be the next step for full robustness.
-        artifactWrapper.innerHTML = `
-            <div class="node-content group hover:bg-[var(--bg-card-hover)] rounded-md px-1 py-0.5">
-              <span class="tree-artifact-text clickable flex items-center text-sm flex-grow" title="View details for: ${escapeJSString(titleContent)}" onclick="showArtifactDetailsModal('${escapeJSString(titleContent)}', '${escapeJSString(descriptionContent)}', '${escapeJSString(a.link || "#")}')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2 tree-artifact-icon flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                <span class="truncate pr-1">${escapeJSString(titleContent)}</span>
-              </span>
-              <div class="actions opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 space-x-1">
-                <button title="Show file info" class="action-icon-btn" onclick="event.stopPropagation(); showInfoDropdown(event, ${a.id}, 'artifact', '${escapeJSString(titleContent)}', '${escapeJSString(descriptionContent)}')">...</button>
-                <button title="Edit file details" class="action-icon-btn" onclick="event.stopPropagation(); startEdit(${a.id}, 'artifact', '${escapeJSString(titleContent)}', '${escapeJSString(descriptionContent)}')">...</button>
-                <button title="Delete file" class="action-icon-btn delete" onclick="event.stopPropagation(); openDeleteConfirmationModal(${a.id}, 'artifact', '${escapeJSString(titleContent)}')">...</button>
-              </div>
-            </div>`;
+        artifactActions.append(infoBtn, editBtn, deleteBtn);
+        artifactContent.append(artifactText, artifactActions);
+        artifactWrapper.appendChild(artifactContent);
         childrenContainer.appendChild(artifactWrapper);
       });
     }
