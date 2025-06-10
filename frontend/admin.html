@@ -1309,7 +1309,6 @@
     try {
       firebaseApp = firebase.initializeApp(firebaseConfig);
       firebaseAuth = firebase.auth();
-      console.log("Admin Panel: Firebase initialized successfully.");
     } catch (e) {
       console.error("Admin Panel: Error initializing Firebase:", e);
       if (window.showNotification)
@@ -1346,7 +1345,6 @@
     // Only proceed if firebaseAuth was initialized
     firebaseAuth.onAuthStateChanged((user) => {
       if (user) {
-        console.log("✅ Admin Panel: Logged in as", user.email);
         if (userDisplayNameSpan)
           userDisplayNameSpan.textContent =
             user.displayName || user.email.split("@")[0];
@@ -1373,9 +1371,6 @@
             );
         }
       } else {
-        console.log(
-          "🚫 Admin Panel: No user logged in. Redirecting to login_admin.html"
-        );
         sessionStorage.removeItem("token"); // This is consistent with login_admin.html
         if (!window.location.pathname.endsWith("login_admin.html")) {
           window.location.href = "login_admin.html";
@@ -1440,7 +1435,6 @@
     // If getAuthToken() returned null but we have an active Firebase user, try one more refresh.
     // This can happen if the token expired and getAuthToken's internal refresh failed, or if currentUser was briefly unavailable.
     if (!token && firebaseAuth && firebaseAuth.currentUser) {
-        console.log("Admin Panel: Initial token missing in secureFetch, attempting one refresh...");
         try {
             token = await firebaseAuth.currentUser.getIdToken(true); // Force refresh
             sessionStorage.setItem("token", token); // Ensure it's stored
@@ -1479,7 +1473,6 @@
                     sessionStorage.setItem("token", newToken);
                     headers["Authorization"] = `Bearer ${newToken}`; // Update header with the new token
 
-                    console.log(`Admin Panel: Retrying ${url} with new token.`);
                     response = await fetch(url, { ...options, headers }); // Retry the request
                 } catch (refreshError) {
                     console.error("Admin Panel: Token refresh for 401 retry failed:", refreshError);
@@ -1546,10 +1539,8 @@
     window.location.hostname === "127.0.0.1"
   ) {
     BASE_API_URL = localBaseUrl;
-    console.log("ADMIN PANEL: Using LOCAL backend API base:", BASE_API_URL);
   } else {
     BASE_API_URL = cloudRunBaseUrl;
-    console.log("ADMIN PANEL: Using CLOUD backend API base:", BASE_API_URL);
 
     // Safety check for common generic placeholder strings
     if (
@@ -1746,7 +1737,6 @@ const docnestLogo = document.getElementById('docnest-logo');
   }
 
   async function fetchTree() {
-    console.log("Admin Panel: Fetching tree data...");
     const treeDiv = document.getElementById("tree");
     if (treeDiv)
       treeDiv.innerHTML = `<p class="text-[var(--text-secondary)] p-2">Loading structure...</p>`;
@@ -1953,7 +1943,6 @@ function renderTree(nodes) {
 
     if (hasArtifacts) {
       n.artifacts.forEach(a => {
-        console.log("DEBUG: Rendering artifact data object:", a);
         const artifactWrapper = document.createElement('div');
         // ... (artifact setup logic remains the same)
         artifactWrapper.className = 'tree-artifact-wrapper';
@@ -2285,7 +2274,6 @@ function showInfoDropdown(event, id, type, name, description) {
       } = userListContainer;
       if (scrollTop + clientHeight >= scrollHeight - 50) {
         if (displayedUserCount < currentUsersToDisplay.length) {
-          console.log("Admin Panel: Reached bottom, loading more users...");
           renderPaginatedUsers(true);
         }
       }
@@ -2728,9 +2716,6 @@ function showInfoDropdown(event, id, type, name, description) {
       let operationFailed = false;
 
       try {
-        console.log(
-          `Admin Panel: Attempting to add/update user: ${email} with global role: ${globalRole}`
-        );
         let userCreationResponse = await secureFetch(`${BASE_API_URL}/api/users`, {
           // USE DYNAMIC URL
           method: "POST",
@@ -2781,9 +2766,6 @@ function showInfoDropdown(event, id, type, name, description) {
         }
 
         if (selectedNodeIdForAccess) {
-          console.log(
-            `Admin Panel: Granting initial node access for ${selectedNodeIdForAccess}`
-          );
           const accessResponse = await secureFetch(`${BASE_API_URL}/api/access`, {
             // USE DYNAMIC URL
             method: "PUT",
@@ -3144,7 +3126,6 @@ function showInfoDropdown(event, id, type, name, description) {
   }
   if (logoutButtonDropdown && firebaseAuth) {
     logoutButtonDropdown.addEventListener("click", async () => {
-      console.log("Admin Panel: Logout button clicked.");
       try {
         await firebaseAuth.signOut();
         sessionStorage.removeItem("token"); // Consistent token name
@@ -3164,13 +3145,11 @@ function showInfoDropdown(event, id, type, name, description) {
 
   // --- Initialization ---
   function initializeAdminPanel() {
-    console.log("Admin Panel: Initializing data with BASE URL:", BASE_API_URL); // Use the dynamic var
     if (firebaseAuth && firebaseAuth.currentUser) {
       fetchTree();
       fetchUsers();
       fetchActivity();
     } else {
-      console.log("Admin Panel: User not logged in, skipping data fetch.");
       const treeDiv = document.getElementById("tree");
       if (treeDiv)
         treeDiv.innerHTML = `<p class="text-[var(--text-tertiary)] p-3 text-center">Please log in to view structure.</p>`;
@@ -3322,8 +3301,6 @@ async function startEdit(id, type, currentName, currentDescription) {
   
   if (!displayElementToReplace) {
     console.error(`Cannot find content display element for editing (type: ${type}):`, id);
-    console.log("DEBUG: Failing on nodeElement:", nodeElement);
-    console.log("DEBUG: innerHTML of failing element:", nodeElement.innerHTML);
     return;
   }
   
