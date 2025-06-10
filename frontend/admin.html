@@ -1614,15 +1614,17 @@ const docnestLogo = document.getElementById('docnest-logo');
   }
 
   function escapeJSString(str) {
-    if (typeof str !== "string") return "";
-    return str
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;")
-      .replace(/`/g, "&#96;");
+  if (typeof str !== "string") {
+    return "";
   }
+  // This function prepares a string to be safely embedded inside single quotes (')
+  // in a JavaScript context, like an onclick attribute.
+  return str
+    .replace(/\\/g, '\\\\')  // 1. Escape backslashes
+    .replace(/'/g, "\\'")    // 2. Escape single quotes
+    .replace(/\n/g, '\\n')    // 3. Escape newlines
+    .replace(/\r/g, '\\r');   // 4. Escape carriage returns
+}
 
   // --- Tree Search ---
   // (Your existing filterTreeDOM and its related code)
