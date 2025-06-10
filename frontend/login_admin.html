@@ -311,9 +311,6 @@
 
       async function handleAdminAuthentication(user) {
         if (!user) {
-          console.log(
-            "Admin Login: handleAdminAuthentication called with no user."
-          );
           setButtonLoadingState(false);
           isProcessingLogin = false;
           return;
@@ -321,14 +318,10 @@
 
         setButtonLoadingState(true);
         clearLoginError();
-        console.log("Admin Login: Processing user", user.email);
 
         try {
           const token = await getIdToken(user, true);
           sessionStorage.setItem("token", token);
-          console.log(
-            "Admin Login: Token obtained, preparing to call backend..."
-          );
 
           // ================================================================
           // DYNAMIC BACKEND URL SELECTION
@@ -340,10 +333,8 @@
 
           if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
             backendApiUrl = localApiUrl;
-            console.log("Using LOCAL backend API:", backendApiUrl);
           } else {
             backendApiUrl = cloudRunApiUrl;
-            console.log("Using CLOUD backend API:", backendApiUrl);
             // Safety check for placeholder URL in production-like environment
             if (cloudRunApiUrl.includes("your-docnest-backend-servicename-xxxxxx-yy") || cloudRunApiUrl.includes("your-actual-cloud-run-url")) {
                  const warningMessage = "CRITICAL: Cloud Run URL is a placeholder! Please update 'cloudRunApiUrl' in the script.";
@@ -360,7 +351,6 @@
             }
           }
           // ================================================================
-          console.log("Admin Login: Calling backend at:", backendApiUrl);
 
           const backendResponse = await fetch(
             backendApiUrl,
@@ -373,10 +363,6 @@
             }
           );
 
-          console.log(
-            "Admin Login: Backend response status:",
-            backendResponse.status
-          );
 
           if (!backendResponse.ok) {
             const errorText = await backendResponse.text();
@@ -397,20 +383,10 @@
           }
 
           const userData = await backendResponse.json();
-          console.log(
-            "Admin Login: Backend auth success. User data:",
-            userData
-          );
 
           if (userData && userData.isAdmin === true) {
-            console.log(
-              "Admin Login: Admin verified. Redirecting to admin.html"
-            );
             window.location.href = "admin.html";
           } else {
-            console.log(
-              "Admin Login: User is not an admin or isAdmin flag missing/false."
-            );
             showLoginError(
               "Access Denied: You do not have administrator privileges."
             );
@@ -440,22 +416,11 @@
       let initialAuthCheckProcessed = false;
       if (auth) {
         onAuthStateChanged(auth, (user) => {
-          console.log(
-            `Admin Login Page: onAuthStateChanged. User: ${
-              user ? user.email : "null"
-            }. Initial Check Processed: ${initialAuthCheckProcessed}. IsProcessing: ${isProcessingLogin}`
-          );
 
           if (user && !initialAuthCheckProcessed && !isProcessingLogin) {
             initialAuthCheckProcessed = true;
-            console.log(
-              "Admin Login Page: Initial check detected user. Handling authentication..."
-            );
             handleAdminAuthentication(user);
           } else if (!user) {
-            console.log(
-              "Admin Login Page: No user session detected or user signed out by onAuthStateChanged."
-            );
             sessionStorage.removeItem("token");
             setButtonLoadingState(false);
             isProcessingLogin = false;
@@ -475,7 +440,6 @@
           return;
         }
         if (isProcessingLogin) {
-          console.log("Sign-in already in progress.");
           return;
         }
 
@@ -484,12 +448,7 @@
         isProcessingLogin = true;
 
         try {
-          console.log("Triggering signInWithPopup for Admin Login...");
           const result = await signInWithPopup(auth, googleProvider);
-          console.log(
-            "Admin Login: signInWithPopup successful, user:",
-            result.user.email
-          );
           await handleAdminAuthentication(result.user);
         } catch (err) {
           console.error("Admin Login: Google Sign-In Popup Error:", err);
