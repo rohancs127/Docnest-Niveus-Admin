@@ -438,13 +438,17 @@
       display: none;
     }
 
-    .node-content {
-      position: relative;
-      display: flex;
-      align-items: center;
-      /*justify-content: space-between;*/
-      padding: 2px 0;
-    }
+    /* In your <head> <style> tag, find and replace the .node-content rule with this: */
+
+  .node-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* This correctly pushes text and icons apart */
+    padding: 2px 0;
+    width: max-content; /* This allows the container to grow as wide as its content needs to be */
+    min-width: 100%;    /* This ensures for short items, it still fills the full row for the hover effect */
+  }
     .tree-children-container {
       margin-left: 20px;
     }
