@@ -1953,6 +1953,7 @@ function renderTree(nodes) {
 
     if (hasArtifacts) {
       n.artifacts.forEach(a => {
+        console.log("DEBUG: Rendering artifact data object:", a);
         const artifactWrapper = document.createElement('div');
         // ... (artifact setup logic remains the same)
         artifactWrapper.className = 'tree-artifact-wrapper';
