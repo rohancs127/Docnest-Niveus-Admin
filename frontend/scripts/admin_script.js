@@ -1358,6 +1358,8 @@ function showInfoDropdown(event, id, type, name, description) {
     if (deleteConfirmationModal)
       deleteConfirmationModal.classList.remove("active");
   }
+  window.closeDeleteConfirmationModal = closeDeleteConfirmationModal;
+
   if (deleteConfirmInput && confirmDeleteButton) {
     deleteConfirmInput.addEventListener("input", () => {
       confirmDeleteButton.disabled =
@@ -1459,6 +1461,8 @@ function showInfoDropdown(event, id, type, name, description) {
         window.showNotification(`Error: ${error.message}`, "error");
     }
   }
+  window.promptNewRoot = promptNewRoot;
+
   // --- End Root Folder ---
 
   // --- Add User Form ---
@@ -1668,6 +1672,7 @@ function showInfoDropdown(event, id, type, name, description) {
     if (modalCurrentAccessDiv)
       modalCurrentAccessDiv.innerHTML = `<p class="text-[var(--text-tertiary)] p-3">Loading access...</p>`;
   }
+  window.closeAccessModal = closeAccessModal;
 
   async function loadUserAccessRolesForModal(email) {
     if (!modalCurrentAccessDiv) return;
@@ -1897,6 +1902,7 @@ function showInfoDropdown(event, id, type, name, description) {
   function closeArtifactDetailsModal() {
     if (artifactDetailsModalEl) artifactDetailsModalEl.classList.remove("active");
   }
+  window.closeArtifactDetailsModal = closeArtifactDetailsModal;
   // --- End Artifact Modal ---
 
   // --- User Menu Dropdown Logic ---
@@ -2048,6 +2054,8 @@ function showInfoDropdown(event, id, type, name, description) {
         activityListInitialSpinnerElement.style.display = "none";
     }
   }
+
+  window.fetchActivity = fetchActivity;
 
   function renderActivity(activities) {
     if (!activityListElement) return;
