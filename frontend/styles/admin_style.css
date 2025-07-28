@@ -1,0 +1,743 @@
+:root {
+      /* Dark Theme (Default) */
+      --bg-primary: #0a0a0a;
+      --bg-card: #1a1a1a;
+      --bg-card-hover: #222222;
+      --bg-input: #2d2d2d;
+      --bg-input-readonly: #383838;
+      --bg-button-primary: #f0f0f0;
+      --bg-button-primary-hover: #ffffff;
+      --bg-button-destructive: #c53030;
+      --bg-button-destructive-hover: #b02a2a;
+      --bg-button-secondary: #4a5568; /* gray-600 like */
+      --bg-button-secondary-hover: #2d3748; /* gray-700 like */
+      --bg-action-icon-hover: #333;
+      --bg-user-list-item: #2c2c2c;
+      --bg-user-list-item-hover: #333333;
+      --bg-inline-form: rgba(42, 42, 42, 0.85);
+      --bg-selected-node: #2a2a2a;
+      --bg-modal-overlay: rgba(0, 0, 0, 0.7);
+      --bg-modal-content: #1f2937; /* gray-800 like */
+      --bg-access-item-even: rgba(255, 255, 255, 0.03);
+      --bg-toast-success: #2f5c3b; /* Darker green */
+      --bg-toast-error: #5c2f2f; /* Darker red */
+      --bg-dropdown-menu: var(--bg-card);
+
+      --text-primary: #e0e0e0;
+      --text-secondary: #bbb;
+      --text-tertiary: #999;
+      --text-placeholder: #888;
+      --text-button-primary: #111;
+      --text-button-destructive: #ffffff;
+      --text-button-secondary: #e2e8f0;
+      --text-card-header: #f0f0f0;
+      --text-link-hover: #0095ff;
+      --text-action-icon: #999;
+      --text-action-icon-hover: #ffffff;
+      --text-green-accent: #4ade80;
+      --text-red-accent: #f87171;
+      --text-yellow-accent: #facc15;
+      --text-toast: #ffffff;
+      --text-dropdown-item-hover: var(--text-link-hover);
+
+      --border-primary: #333;
+      --border-input: #555;
+      --border-input-focus: #007acc;
+      --border-button-primary: #ccc;
+      --border-button-primary-hover: #bbb;
+      --border-button-destructive: #a02828;
+      --border-button-secondary: #4a5568;
+      --border-selected-node: #007acc;
+      --border-tree-children: rgba(107, 114, 128, 0.3);
+      --border-tree-line: #444;
+      --border-preview: #555;
+      --border-toast-success: #38a169; /* green-600 */
+      --border-toast-error: #e53e3e; /* red-600 */
+      --border-dropdown-menu: var(--border-primary);
+
+      --shadow-card: 0 8px 20px rgba(0, 0, 0, 0.3);
+      --shadow-input-focus: 0 0 0 3px rgba(0, 122, 204, 0.3);
+      --shadow-selected-node: inset 2px 0 0 var(--border-selected-node);
+      --shadow-modal: 0 10px 25px rgba(0, 0, 0, 0.5);
+      --shadow-toast: 0 4px 12px rgba(0, 0, 0, 0.4);
+      --shadow-dropdown: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+      --scrollbar-thumb: #4a4a4a;
+      --scrollbar-track: #1e1e1e;
+
+      /* Add these new CSS variables to your existing :root */
+      --text-blue-accent: #60a5fa;
+      --text-purple-accent: #a78bfa;
+      --shadow-3xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .light-theme {
+      --bg-primary: #f4f4f5;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f9fafb;
+      --bg-input: #ffffff;
+      --bg-input-readonly: #e5e7eb;
+      --bg-button-primary: #27272a;
+      --bg-button-primary-hover: #18181b;
+      --bg-button-destructive: #ef4444;
+      --bg-button-destructive-hover: #dc2626;
+      --bg-button-secondary: #e5e7eb;
+      --bg-button-secondary-hover: #d1d5db;
+      --bg-action-icon-hover: #e5e7eb;
+      --bg-user-list-item: #f9fafb;
+      --bg-user-list-item-hover: #f3f4f6;
+      --bg-inline-form: rgba(243, 244, 246, 0.9);
+      --bg-selected-node: #dbeafe;
+      --bg-modal-overlay: rgba(0, 0, 0, 0.3);
+      --bg-modal-content: #ffffff;
+      --bg-access-item-even: #f3f4f6;
+      --bg-toast-success: #c6f6d5; /* Lighter green */
+      --bg-toast-error: #fed7d7; /* Lighter red */
+      --bg-dropdown-menu: var(--bg-card);
+
+      --text-primary: #18181b;
+      --text-secondary: #52525b;
+      --text-tertiary: #71717a;
+      --text-placeholder: #a1a1aa;
+      --text-button-primary: #ffffff;
+      --text-button-destructive: #ffffff;
+      --text-button-secondary: #1f2937;
+      --text-card-header: #1f2937;
+      --text-link-hover: #2563eb;
+      --text-action-icon: #71717a;
+      --text-action-icon-hover: #18181b;
+      --text-green-accent: #16a34a;
+      --text-red-accent: #dc2626;
+      --text-yellow-accent: #ca8a04;
+      --text-toast: #1a202c; /* Dark text for light toasts */
+      --text-dropdown-item-hover: var(--text-link-hover);
+
+      --border-primary: #d1d5db;
+      --border-input: #d1d5db;
+      --border-input-focus: #2563eb;
+      --border-button-primary: #27272a;
+      --border-button-primary-hover: #18181b;
+      --border-button-destructive: #ef4444;
+      --border-button-secondary: #d1d5db;
+      --border-selected-node: #2563eb;
+      --border-tree-children: rgba(209, 213, 219, 0.5);
+      --border-tree-line: #ccc;
+      --border-preview: #d1d5db;
+      --border-toast-success: #68d391; /* green-400 */
+      --border-toast-error: #fc8181; /* red-400 */
+      --border-dropdown-menu: var(--border-primary);
+
+      --shadow-card: 0 4px 15px rgba(0, 0, 0, 0.07);
+      --shadow-input-focus: 0 0 0 3px rgba(37, 99, 235, 0.2);
+      --shadow-selected-node: inset 2px 0 0 var(--border-selected-node);
+      --shadow-modal: 0 10px 25px rgba(0, 0, 0, 0.1);
+      --shadow-toast: 0 4px 12px rgba(0, 0, 0, 0.15);
+      --shadow-dropdown: 0 4px 6px -1px rgba(0, 0, 0, 0.07),
+        0 2px 4px -1px rgba(0, 0, 0, 0.04);
+
+      --scrollbar-thumb: #a1a1aa;
+      --scrollbar-track: #e5e7eb;
+
+      /* Enhanced card styles */
+      .card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-primary);
+        border-radius: 1rem;
+        box-shadow: var(--shadow-card);
+        transition: all 0.3s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-2px);
+      }
+
+      /* Enhanced input field styles */
+      .input-field {
+        transition: all 0.2s ease;
+      }
+
+      .input-field:focus {
+        transform: translateY(-1px);
+      }
+
+      /* Enhanced button styles */
+      .action-icon-btn {
+        transition: all 0.2s ease;
+      }
+
+      .action-icon-btn:hover {
+        transform: scale(1.1);
+      }
+
+      /* Enhanced scrollbar styles */
+      #tree-container::-webkit-scrollbar,
+      #activity-container::-webkit-scrollbar,
+      #userListContainer::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      #tree-container::-webkit-scrollbar-track,
+      #activity-container::-webkit-scrollbar-track,
+      #userListContainer::-webkit-scrollbar-track {
+        background: var(--scrollbar-track);
+        border-radius: 4px;
+      }
+
+      #tree-container::-webkit-scrollbar-thumb,
+      #activity-container::-webkit-scrollbar-thumb,
+      #userListContainer::-webkit-scrollbar-thumb {
+        background: var(--scrollbar-thumb);
+        border-radius: 4px;
+      }
+
+      #tree-container::-webkit-scrollbar-thumb:hover,
+      #activity-container::-webkit-scrollbar-thumb:hover,
+      #userListContainer::-webkit-scrollbar-thumb:hover {
+        background: var(--text-tertiary);
+      }
+    }
+
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .selected-node-highlight {
+      background-color: var(--bg-selected-node);
+      border-color: var(--border-selected-node);
+      border-left-width: 3px;
+      box-shadow: var(--shadow-selected-node);
+    }
+    .form-inline input,
+    .form-inline select,
+    .form-inline textarea {
+      margin-bottom: 0.75rem;
+    }
+    .node-item:hover .actions,
+    .artifact-item:hover .actions {
+      opacity: 1;
+    }
+    .actions {
+      transition: opacity 0.2s ease-in-out;
+    }
+    #tree-container,
+    #access-management-modal-current-access,
+    #artifact-details-modal-description,
+    #userListContainer /* Added for user list scroll */ {
+      max-height: 70vh; /* Default max height, can be adjusted */
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+    }
+    #tree-container::-webkit-scrollbar,
+    #access-management-modal-current-access::-webkit-scrollbar,
+    #artifact-details-modal-description::-webkit-scrollbar,
+    #userListContainer::-webkit-scrollbar /* Added for user list scroll */ {
+      width: 6px;
+    }
+
+    #tree-container::-webkit-scrollbar-track,
+    #access-management-modal-current-access::-webkit-scrollbar-track,
+    #artifact-details-modal-description::-webkit-scrollbar-track,
+    #userListContainer::-webkit-scrollbar-track /* Added for user list scroll */ {
+      background: var(--scrollbar-track);
+    }
+
+    #tree-container::-webkit-scrollbar-thumb,
+    #access-management-modal-current-access::-webkit-scrollbar-thumb,
+    #artifact-details-modal-description::-webkit-scrollbar-thumb,
+    #userListContainer::-webkit-scrollbar-thumb /* Added for user list scroll */ {
+      background-color: var(--scrollbar-thumb);
+      border-radius: 3px;
+    }
+    #access-management-modal-current-access {
+      max-height: 250px;
+    }
+    #artifact-details-modal-description {
+      max-height: 200px;
+    }
+    #userListContainer {
+      /* Specific height for user list */
+      max-height: 400px; /* Adjust as needed */
+      min-height: 200px; /* Ensure it has some height even when empty */
+      border: 1px solid var(--border-primary); /* Use theme border */
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+    }
+
+    .submit-button {
+      background-color: var(--bg-button-primary);
+      color: var(--text-button-primary);
+      font-weight: 600;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border-button-primary);
+      transition: background-color 0.2s ease-in-out,
+        transform 0.1s ease-in-out, border-color 0.2s ease-in-out;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .submit-button:hover {
+      background-color: var(--bg-button-primary-hover);
+      border-color: var(--border-button-primary-hover);
+      transform: translateY(-1px);
+    }
+    .submit-button:active {
+      transform: translateY(0px);
+    }
+    .submit-button.destructive {
+      background-color: var(--bg-button-destructive);
+      color: var(--text-button-destructive);
+      border-color: var(--border-button-destructive);
+    }
+    .submit-button.destructive:hover {
+      background-color: var(--bg-button-destructive-hover);
+    }
+    .submit-button.secondary {
+      background-color: var(--bg-button-secondary);
+      color: var(--text-button-secondary);
+      border-color: var(--border-button-secondary);
+    }
+    .submit-button.secondary:hover {
+      background-color: var(--bg-button-secondary-hover);
+    }
+    .submit-button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    .spinner {
+      animation: spin 1s linear infinite;
+      border: 2px solid var(--text-button-primary);
+      border-top-color: transparent;
+      border-radius: 50%;
+      width: 1em;
+      height: 1em;
+      margin-right: 0.5em;
+    }
+    .light-theme .submit-button .spinner {
+      border: 2px solid var(--text-button-primary);
+      border-top-color: transparent;
+    }
+    .submit-button.secondary .spinner,
+    .submit-button.destructive .spinner {
+      border: 2px solid var(--text-button-secondary);
+      border-top-color: transparent;
+    }
+    .light-theme .submit-button.secondary .spinner {
+      border: 2px solid var(--text-button-secondary);
+      border-top-color: transparent;
+    }
+
+    .input-field,
+    textarea.input-field {
+      margin-top: 0.25rem;
+      display: block;
+      width: 100%;
+      border-radius: 0.375rem;
+      border: 1px solid var(--border-input);
+      background-color: var(--bg-input);
+      color: var(--text-primary);
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out,
+        background-color 0.2s ease;
+    }
+    textarea.input-field {
+      min-height: 60px;
+    }
+    .input-field::placeholder,
+    textarea.input-field::placeholder {
+      color: var(--text-placeholder);
+    }
+    .input-field:focus,
+    textarea.input-field:focus {
+      border-color: var(--border-input-focus);
+      outline: none;
+      box-shadow: var(--shadow-input-focus);
+    }
+    .input-field.readonly {
+      background-color: var(--bg-input-readonly);
+      cursor: not-allowed;
+    }
+
+    .label-text {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 0.25rem;
+    }
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-primary);
+      border-radius: 0.75rem; /* Reduced from rounded-xl for consistency */
+      box-shadow: var(--shadow-card);
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+    .card-header {
+      color: var(--text-card-header);
+      font-weight: 600;
+    }
+
+    /* Tree Styling with Connection Lines */
+    .tree-node,
+    .tree-artifact-wrapper {
+      position: relative;
+      padding-left: 20px;
+    }
+    .tree-node::before,
+    .tree-artifact-wrapper::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 8px;
+      width: 1px;
+      height: 100%;
+      background-color: var(--border-tree-line);
+    }
+    .tree-node > .node-content::before,
+    .tree-artifact-wrapper > .node-content::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      left: -11px;
+      width: 12px;
+      height: 1px;
+      background-color: var(--border-tree-line);
+    }
+    .tree-node:last-child::before {
+      height: 13px;
+    }
+    .tree-artifact-wrapper:last-child::before {
+      height: 13px;
+    }
+    .tree-root > .tree-node::before,
+    .tree-root > .tree-artifact-wrapper::before {
+      display: none;
+    }
+    .tree-root > .tree-node > .node-content::before,
+    .tree-root > .tree-artifact-wrapper > .node-content::before {
+      display: none;
+    }
+
+    /* In your <head> <style> tag, find and replace the .node-content rule with this: */
+
+  .node-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* This correctly pushes text and icons apart */
+    padding: 2px 0;
+    width: max-content; /* This allows the container to grow as wide as its content needs to be */
+    min-width: 100%;    /* This ensures for short items, it still fills the full row for the hover effect */
+  }
+    .tree-children-container {
+      margin-left: 20px;
+    }
+    .tree-children-container.collapsed {
+      display: none;
+    }
+    .tree-toggle-icon {
+      cursor: pointer;
+      width: 1.25rem;
+      height: 1.25rem;
+      margin-right: 0.25rem;
+      color: var(--text-tertiary);
+      transition: transform 0.2s ease-in-out;
+      display: inline-flex; /* For centering icon */
+      align-items: center;
+      justify-content: center;
+    }
+    .tree-toggle-icon.collapsed svg {
+      transform: rotate(-90deg);
+    }
+
+    .tree-node-text,
+    .tree-artifact-text {
+      transition: color 0.2s ease-in-out;
+      display: flex;
+      align-items: center;
+    }
+    .tree-node-text {
+      color: var(--text-primary);
+    }
+    .tree-artifact-text {
+      color: var(--text-tertiary);
+    }
+    .tree-artifact-text.clickable:hover {
+      color: var(--text-link-hover);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .tree-node-icon {
+      color: var(--text-yellow-accent);
+    }
+    .tree-artifact-icon {
+      color: var(--text-tertiary);
+    }
+    .artifact-preview-container {
+      display: none;
+    }
+
+    .user-list-item {
+      background-color: var(--bg-user-list-item);
+      border: 1px solid var(--border-primary);
+      border-radius: 0.5rem;
+      transition: background-color 0.2s ease-in-out,
+        transform 0.2s ease-in-out, border-color 0.2s ease;
+    }
+    .user-list-item:hover {
+      background-color: var(--bg-user-list-item-hover);
+      transform: translateY(-2px);
+    }
+    .user-email-text {
+      color: var(--text-primary);
+    }
+    .user-role-text {
+      color: var(--text-secondary);
+    }
+    .user-node-role-summary {
+      color: var(--text-tertiary);
+      font-size: 0.8rem;
+    }
+
+    .action-icon-btn {
+      color: var(--text-action-icon);
+      padding: 0.3rem;
+      border-radius: 0.25rem;
+      transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out;
+    }
+    .action-icon-btn:hover {
+      color: var(--text-action-icon-hover);
+      background-color: var(--bg-action-icon-hover);
+    }
+    .action-icon-btn.add {
+      color: var(--text-green-accent);
+    }
+    .action-icon-btn.delete {
+      color: var(--text-red-accent);
+    }
+    .action-icon-btn.add:hover {
+      color: var(--text-green-accent); /* Maintain color */
+    }
+    .action-icon-btn.delete:hover {
+      color: var(--text-red-accent); /* Maintain color */
+    }
+
+    .user-action-button {
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.8rem;
+      font-weight: 500;
+      transition: background-color 0.2s ease-in-out,
+        transform 0.1s ease-in-out, color 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+    }
+    .user-action-button svg {
+      margin-right: 0.3rem;
+    }
+    .user-action-button.manage-access {
+      background-color: var(--bg-input);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-input);
+    }
+    .user-action-button.manage-access:hover {
+      background-color: var(--bg-action-icon-hover);
+      color: var(--text-action-icon-hover);
+      transform: translateY(-1px);
+    }
+    .user-action-button.delete-user {
+      background-color: var(--bg-button-destructive);
+      color: var(--text-button-destructive);
+      border: 1px solid var(--border-button-destructive);
+    }
+    .user-action-button.delete-user:hover {
+      background-color: var(--bg-button-destructive-hover);
+      transform: translateY(-1px);
+    }
+
+    #theme-toggle-button {
+      background-color: var(--bg-card);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-primary);
+    }
+    #theme-toggle-button:hover {
+      background-color: var(--bg-card-hover);
+      color: var(--text-primary);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--bg-modal-overlay);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1000;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    .modal-content {
+      background-color: var(--bg-modal-content);
+      padding: 2rem;
+      border-radius: 0.75rem;
+      box-shadow: var(--shadow-modal);
+      width: 90%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      transform: scale(0.95) translateY(10px);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+    }
+    .modal-overlay.active .modal-content {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-card-header);
+    }
+    .modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-tertiary);
+      transition: color 0.2s ease;
+    }
+    .modal-close-btn:hover {
+      color: var(--text-primary);
+    }
+    .access-item:nth-child(even) {
+      background-color: var(--bg-access-item-even);
+    }
+
+    /* Search Bar & User Menu */
+    #search-tree-input {
+      /* For folder/file search */
+      width: 100%;
+      max-width: 400px;
+      padding: 0.6rem 1rem;
+      font-size: 0.9rem;
+    }
+    #search-users-input {
+      /* Style inherited via .input-field */
+      margin-bottom: 1rem; /* Space below user search */
+    }
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .user-menu-container {
+      position: relative;
+    }
+    #user-menu-button {
+      background-color: var(--bg-card);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-primary);
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    #user-menu-button:hover {
+      background-color: var(--bg-card-hover);
+      color: var(--text-primary);
+    }
+    #user-dropdown-menu {
+      background-color: var(--bg-dropdown-menu);
+      border: 1px solid var(--border-dropdown-menu);
+      box-shadow: var(--shadow-dropdown);
+      z-index: 1010;
+    }
+    #user-dropdown-menu button:hover {
+      background-color: var(--bg-card-hover);
+      color: var(--text-dropdown-item-hover);
+    }
+
+    .hidden-node {
+      display: none !important;
+    }
+
+    /* Toast Notification Styles */
+    #toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .toast {
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+      color: var(--text-toast);
+      box-shadow: var(--shadow-toast);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .toast.success {
+      background-color: var(--bg-toast-success);
+      border: 1px solid var(--border-toast-success);
+    }
+    .toast.error {
+      background-color: var(--bg-toast-error);
+      border: 1px solid var(--border-toast-error);
+    }
+    .toast.info {
+      /* Added styling for info toasts */
+      background-color: var(--bg-button-secondary); /* Example */
+      border: 1px solid var(--border-button-secondary);
+      color: var(--text-button-secondary);
+    }
+    .light-theme .toast.info {
+      background-color: #e2e8f0; /* Example light info */
+      border: 1px solid #cbd5e1;
+      color: #475569;
+    }
+    .toast-icon {
+      flex-shrink: 0;
+    }
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
