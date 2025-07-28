@@ -596,6 +596,7 @@ const docnestLogo = document.getElementById('docnest-logo');
         window.showNotification(`Error loading folder structure: ${error.message}`, "error");
     }
   }
+  window.fetchTree = fetchTree;
 
   // Inside your <script> tags
 
@@ -1078,6 +1079,7 @@ function showInfoDropdown(event, id, type, name, description) {
   async function deleteUser(email) {
     openDeleteConfirmationModal(email, "user", email);
   }
+  window.deleteUser = deleteUser;
   // --- End User Management ---
 
   // --- Inline Form (Add item to folder) ---
@@ -1148,6 +1150,7 @@ function showInfoDropdown(event, id, type, name, description) {
       }
     }
   }
+  window.showInlineForm = showInlineForm;
 
   function toggleFileInput(parentId) {
     const typeSelect = document.getElementById(`type-${parentId}`);
@@ -1666,6 +1669,7 @@ function showInfoDropdown(event, id, type, name, description) {
     if (accessModal) accessModal.classList.add("active");
     await loadUserAccessRolesForModal(email);
   }
+  window.openAccessModal = openAccessModal;
 
   function closeAccessModal() {
     if (accessModal) accessModal.classList.remove("active");
@@ -1802,6 +1806,8 @@ function showInfoDropdown(event, id, type, name, description) {
       if (revokeButton) revokeButton.disabled = false;
     }
   }
+  window.revokeNodeAccessInModal = revokeNodeAccessInModal;
+  
   const grantNewAccessFormElement = document.getElementById("grantNewAccessForm");
   if (grantNewAccessFormElement) {
     grantNewAccessFormElement.addEventListener("submit", async (e) => {
