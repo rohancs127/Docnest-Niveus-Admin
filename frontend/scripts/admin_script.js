@@ -1176,6 +1176,9 @@ function showInfoDropdown(event, id, type, name, description) {
       if (linkInput) linkInput.value = "";
     }
   }
+
+  window.toggleFileInput= toggleFileInput;
+
   function toggleLinkOrUpload(parentId) {
     const fileSourceSelect = document.getElementById(`file-source-${parentId}`);
     const linkInputContainer = document.getElementById(
@@ -1195,6 +1198,8 @@ function showInfoDropdown(event, id, type, name, description) {
     if (fileSource === "link" && fileInput) fileInput.value = "";
     if (fileSource === "upload" && linkInput) linkInput.value = "";
   }
+  window.toggleLinkOrUpload = toggleLinkOrUpload;
+
   async function submitInlineForm(parentId, submitButton) {
     const name = document.getElementById(`name-${parentId}`).value;
     const type = document.getElementById(`type-${parentId}`).value;
@@ -1760,6 +1765,7 @@ function showInfoDropdown(event, id, type, name, description) {
       selectElement.style.opacity = "1";
     }
   }
+  window.updateNodeAccessInModal = updateNodeAccessInModal;
 
   async function revokeNodeAccessInModal(email, nodeId) {
     const nodeName = await fetchNodeName(nodeId);
